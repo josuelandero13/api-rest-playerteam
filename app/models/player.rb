@@ -1,9 +1,10 @@
 class Player < ApplicationRecord
-  has_many :player_skills
+  has_many :player_skills, dependent: :destroy
+  accepts_nested_attributes_for :player_skills
 
   validates :name, :position, presence: true
-
-  AVAILABLE_POSITIONS = %w[
-    defender midfielder forward
-  ].freeze
+  validates :position, inclusion: {
+      in: %w[defender midfielder forward],
+      message: "Invalid value for position: %{value}"
+    }
 end
