@@ -3,5 +3,6 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :players, path: :player
+    post "team/team_process", to: "team#team_process"
   end
 end
