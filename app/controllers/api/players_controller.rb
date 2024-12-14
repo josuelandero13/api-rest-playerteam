@@ -13,12 +13,7 @@ class Api::PlayersController < ApplicationController
 
   def show
     if player.present?
-      render json: player.as_json(
-        include: {
-          player_skills: { only: [ :id, :skill_name, :value, :player_id ] }
-        },
-        only: [ :id, :name, :position ]
-      )
+      render json: serialize_player_with_skills(player), status: :ok
     else
       render json: { error: "Player not found" }, status: :not_found
     end
@@ -28,12 +23,7 @@ class Api::PlayersController < ApplicationController
     player = Player.new(player_params)
 
     if player.save
-      render json: player.as_json(
-        include: {
-          player_skills: { only: [ :id, :skill_name, :value, :player_id ] }
-        },
-        only: [ :id, :name, :position ]
-      ), status: :created
+      render json: serialize_player_with_skills(player), status: :created
     else
       render json: player.errors.messages, status: :unprocessable_entity
     end
@@ -41,14 +31,7 @@ class Api::PlayersController < ApplicationController
 
   def update
     if player.update(player_params)
-      render json: player.as_json(
-        include: {
-          player_skills: {
-            only: [ :id, :skill_name, :value, :player_id ]
-          }
-        },
-        only: [ :id, :name, :position ]
-      ), status: :ok
+      render json: serialize_player_with_skills(player), status: :ok
     else
       render json: @player.errors, status: :unprocessable_entity
     end
@@ -90,5 +73,14 @@ class Api::PlayersController < ApplicationController
     secure_token = Rails.application.credentials.dig(:api, :bearer_token)
 
     ActiveSupport::SecurityUtils.secure_compare(token.to_s, secure_token.to_s)
+  end
+
+  def serialize_player_with_skills(player)
+    player.as_json(
+      include: {
+        player_skills: { only: [ :id, :skill_name, :value, :player_id ] }
+      },
+      only: [ :id, :name, :position ]
+    )
   end
 end
